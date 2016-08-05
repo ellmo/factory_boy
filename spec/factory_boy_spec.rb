@@ -1,5 +1,5 @@
 require "rspec"
-require "./factory_boy"
+require_relative "../lib/factory_boy"
 
 class User; attr_accessor :name; end
 class SlightlyAppearingInThisMovie; end

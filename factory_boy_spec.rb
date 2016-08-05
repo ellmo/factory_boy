@@ -2,6 +2,7 @@ require "rspec"
 require "./factory_boy"
 
 class User; attr_accessor :name; end
+class SlightlyAppearingInThisMovie; end
 
 RSpec.configure do |config|
   config.after(:each) do
@@ -31,8 +32,6 @@ RSpec.describe "FactoryBoy" do
 
   context "factories with no defaults" do
     context ".build" do
-      class SlightlyAppearingInThisMovie; end
-
       before { FactoryBoy.define_factory User }
 
       let(:build_with_arguments) { FactoryBoy.build User, name: "foobar" }
@@ -52,6 +51,30 @@ RSpec.describe "FactoryBoy" do
 
       it "ignores mismatched attributes" do
         expect(FactoryBoy.build User, foo: "bar").to be_an_instance_of(User)
+      end
+    end
+  end
+
+  context "factories with default values" do
+    before do
+      FactoryBoy.define_factory User do
+        name "Christie"
+      end
+    end
+
+    context "no arguments given" do
+      subject {FactoryBoy.build User}
+      it "builds with default values" do
+        expect(subject).to be_an_instance_of(User)
+        expect(subject.name).to eq "Christie"
+      end
+    end
+
+    context "overriding arguments given" do
+      subject {FactoryBoy.build User, name: "Jesse"}
+      it "builds with given arguments, overriding defaults" do
+        expect(subject).to be_an_instance_of(User)
+        expect(subject.name).to eq "Jesse"
       end
     end
   end

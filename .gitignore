@@ -4,3 +4,5 @@ tmp
 dsl1.txt
 dsl2.txt
 dsl3.txt
+
+*.gem

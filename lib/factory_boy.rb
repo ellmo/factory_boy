@@ -4,26 +4,27 @@ class FactoryBoy
   @@factories = {}
 
   class << self
-    def define_factory(class_name, &block)
-      class_name = tokenize_class_name class_name
-      unless @@factories[class_name]
+    def define_factory(factory_name, &block)
+      factory_name = tokenize_factory_name factory_name
+      unless @@factories[factory_name]
         attribute_hash = if block_given?
           DSL.run(block).attribute_hash
         else
           {}
         end
-        @@factories[class_name] = attribute_hash
+        @@factories[factory_name] = attribute_hash
         "defined factory"
       else
         "factory already defined"
       end
     end
 
-    def build class_name, options={}
-      class_name = tokenize_class_name class_name
-      if @@factories[class_name]
-        inst = Object.const_get(camelize class_name).new
-        options = @@factories[class_name].merge options
+    def build factory_name, options={}
+
+      factory_name = tokenize_factory_name factory_name
+      if @@factories[factory_name]
+        inst = Object.const_get(camelize factory_name).new
+        options = @@factories[factory_name].merge options
         options.each do |attr, value|
           attr = (attr.to_s + "=").to_sym
           if inst.class.instance_methods.include? attr
@@ -38,9 +39,9 @@ class FactoryBoy
 
     private
 
-    def tokenize_class_name class_name
-      class_name = class_name.name if class_name.is_a? Class
-      (underscore class_name).to_sym
+    def tokenize_factory_name factory_name
+      factory_name = factory_name.name if factory_name.is_a? Class
+      (underscore factory_name).to_sym
     end
 
     def underscore str

@@ -20,6 +20,10 @@ RSpec.describe "FactoryBoy" do
       expect(FactoryBoy.define_factory User).to eq "defined factory"
     end
 
+    it "defines factory if given a symbol" do
+      expect(FactoryBoy.define_factory :user).to eq "defined factory"
+    end
+
     it "raises error if given an undefined constant" do
       expect { FactoryBoy.define_factory NotAppearingInThisMovie }.to raise_error NameError
     end
@@ -28,11 +32,25 @@ RSpec.describe "FactoryBoy" do
       FactoryBoy.define_factory User
       expect(FactoryBoy.define_factory User).to eq "factory already defined"
     end
+
+    context "if a factory is defined with a symbol first" do
+      it "treats symbol and class calls the same way" do
+        FactoryBoy.define_factory :user
+        expect(FactoryBoy.define_factory User).to eq "factory already defined"
+      end
+    end
+
+    context "if a factory is defined with a Class first" do
+      it "treats symbol and class calls the same way" do
+        FactoryBoy.define_factory User
+        expect(FactoryBoy.define_factory :user).to eq "factory already defined"
+      end
+    end
   end
 
   context "factories with no defaults" do
     context ".build" do
-      before { FactoryBoy.define_factory User }
+      before { FactoryBoy.define_factory :user }
 
       let(:build_with_arguments) { FactoryBoy.build User, name: "foobar" }
 
@@ -41,7 +59,7 @@ RSpec.describe "FactoryBoy" do
       end
 
       it "builds a bare instance when not given any arguments" do
-        expect(FactoryBoy.build User).to be_an_instance_of(User)
+        expect(FactoryBoy.build :user).to be_an_instance_of(User)
       end
 
       it "builds instance with arguments when given proper ones" do
@@ -50,20 +68,20 @@ RSpec.describe "FactoryBoy" do
       end
 
       it "ignores mismatched attributes" do
-        expect(FactoryBoy.build User, foo: "bar").to be_an_instance_of(User)
+        expect(FactoryBoy.build :user, foo: "bar").to be_an_instance_of(User)
       end
     end
   end
 
   context "factories with default values" do
     before do
-      FactoryBoy.define_factory User do
+      FactoryBoy.define_factory :user do
         name "Christie"
       end
     end
 
     context "no arguments given" do
-      subject {FactoryBoy.build User}
+      subject {FactoryBoy.build :user}
       it "builds with default values" do
         expect(subject).to be_an_instance_of(User)
         expect(subject.name).to eq "Christie"
@@ -71,7 +89,7 @@ RSpec.describe "FactoryBoy" do
     end
 
     context "overriding arguments given" do
-      subject {FactoryBoy.build User, name: "Jesse"}
+      subject {FactoryBoy.build :user, name: "Jesse"}
       it "builds with given arguments, overriding defaults" do
         expect(subject).to be_an_instance_of(User)
         expect(subject.name).to eq "Jesse"

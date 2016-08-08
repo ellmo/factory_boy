@@ -4,7 +4,8 @@ class FactoryBoy
   @@factories = {}
 
   class << self
-    def define_factory(factory_name, &block)
+    def define_factory(factory_name, options={}, &block)
+      class_name = tokenize_factory_name(options[:class] || factory_name)
       factory_name = tokenize_factory_name factory_name
       unless @@factories[factory_name]
         attribute_hash = if block_given?
@@ -12,7 +13,7 @@ class FactoryBoy
         else
           {}
         end
-        @@factories[factory_name] = attribute_hash
+        @@factories[factory_name] = {class: class_name, defaults: attribute_hash}
         "defined factory"
       else
         "factory already defined"
@@ -20,11 +21,10 @@ class FactoryBoy
     end
 
     def build factory_name, options={}
-
-      factory_name = tokenize_factory_name factory_name
-      if @@factories[factory_name]
-        inst = Object.const_get(camelize factory_name).new
-        options = @@factories[factory_name].merge options
+      factory = @@factories[tokenize_factory_name factory_name]
+      if factory
+        inst = Object.const_get(camelize factory[:class]).new
+        options = factory[:defaults].merge options
         options.each do |attr, value|
           attr = (attr.to_s + "=").to_sym
           if inst.class.instance_methods.include? attr

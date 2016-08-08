@@ -1,7 +1,7 @@
 require "rspec"
 require_relative "../lib/factory_boy"
 
-class User; attr_accessor :name; end
+class User; attr_accessor :name, :admin; end
 class SlightlyAppearingInThisMovie; end
 
 RSpec.configure do |config|
@@ -93,6 +93,30 @@ RSpec.describe "FactoryBoy" do
       it "builds with given arguments, overriding defaults" do
         expect(subject).to be_an_instance_of(User)
         expect(subject.name).to eq "Jesse"
+      end
+    end
+  end
+
+  context "using aliases" do
+    before do
+      FactoryBoy.define_factory :admin, class: :user do
+        admin true
+      end
+    end
+
+    context "no arguments given" do
+      subject {FactoryBoy.build :admin}
+      it "builds with default values" do
+        expect(subject).to be_an_instance_of(User)
+        expect(subject.admin).to be true
+      end
+    end
+
+    context "overriding arguments given" do
+      subject {FactoryBoy.build :admin, admin: false}
+      it "builds with given arguments, overriding defaults" do
+        expect(subject).to be_an_instance_of(User)
+        expect(subject.admin).to be false
       end
     end
   end
